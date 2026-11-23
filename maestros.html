@@ -704,7 +704,12 @@ async function ask(feature,prompt,schema,route){
   if(window.__MOCK_AI){const r=await window.__MOCK_AI(feature,prompt,route);data=r.data;src=r.source}
   else{
     if(!AI.ready)throw new Error(AI.error||'not ready');
-    const res=await Promise.race([getModel(feature,schema,route).generateContent(prompt),new Promise((_,rej)=>setTimeout(()=>rej(new Error(I('La IA tardó demasiado. Revisa la conexión e intenta otra vez.','The AI took too long. Check your connection and try again.'))),40000))]);
+    const intento=(r,ms)=>Promise.race([getModel(feature,schema,r).generateContent(prompt),new Promise((_,rej)=>setTimeout(()=>{const e=new Error(I('La IA tardó demasiado. Revisa la conexión e intenta otra vez.','The AI took too long. Check your connection and try again.'));e.tarde=true;rej(e)},ms))]);
+    let res;
+    try{res=await intento(route,route==='only_in_cloud'?45000:120000)}
+    catch(e){ // Gemini Nano puede tardar en una computadora lenta: en modo híbrido se pasa a la nube
+      if(!(route==='prefer_on_device'&&(e.tarde||AI.deviceStatus!=='available')))throw e;
+      res=await intento('only_in_cloud',45000)}
     data=parseJSON(res.response.text());src=res.response.inferenceSource==='on_device'?'device':'cloud';
   }
   S.stats[src==='device'?'dev':'cloud']++;save();
@@ -831,7 +836,7 @@ async function generar(){
   } else prompt=PROMPTS[S.tab](c,limpiar(($('#tema')&&$('#tema').value)||'').slice(0,160));
   if(S.route==='only_on_device'||route==='only_on_device'){await checkDevice();if(AI.deviceStatus!=='available'&&!window.__MOCK_AI){out.innerHTML=`<div class="aviso">${I('«Solo en este aparato» necesita Chrome de computadora con Gemini Nano. Cambia a «Híbrido» o usa el material sin IA.','«Device only» needs desktop Chrome with Gemini Nano. Switch to «Hybrid» or use the material without AI.')}</div>`+respaldo();return}}
   if(!navigator.onLine&&AI.deviceStatus!=='available'&&!window.__MOCK_AI){out.innerHTML=`<div class="aviso">📴 ${I('No hay internet y este aparato no tiene IA local. Aquí está el material de Ethan sin IA.','No internet and this device has no local AI. Here is Ethan\'s material without AI.')}</div>`+respaldo();return}
-  btn.disabled=true;out.innerHTML=`<div class="card cargando">⏳ ${I('La IA está trabajando…','The AI is working…')}</div>`;
+  btn.disabled=true;out.innerHTML=`<div class="card cargando">⏳ ${I('La IA está trabajando… La primera vez puede tardar hasta 2 minutos.','The AI is working… The first time can take up to 2 minutes.')}</div>`;
   try{const r=await ask(S.tab,prompt,SCH[S.tab],route);out.innerHTML=mostrar(S.tab,r.data,r)}
   catch(e){out.innerHTML=`<div class="aviso">⚠️ ${I('No se pudo usar la IA','Could not use the AI')}: ${esc(e&&e.message||e)}</div>`+respaldo()}
   finally{btn.disabled=false;enlazarResultado()}
