@@ -705,11 +705,18 @@ async function ask(feature,prompt,schema,route){
   else{
     if(!AI.ready)throw new Error(AI.error||'not ready');
     const intento=(r,ms)=>Promise.race([getModel(feature,schema,r).generateContent(prompt),new Promise((_,rej)=>setTimeout(()=>{const e=new Error(I('La IA tardó demasiado. Revisa la conexión e intenta otra vez.','The AI took too long. Check your connection and try again.'));e.tarde=true;rej(e)},ms))]);
+    const ocupado=e=>/\b(429|500|503)\b|high demand|overloaded|unavailable/i.test(String(e&&e.message||e));
+    const nube=async()=>{ // si la nube está saturada, espera un poco y lo intenta otra vez (hasta 3 veces)
+      for(let i=0;;i++){try{return await intento('only_in_cloud',45000)}
+        catch(e){if(i>=2||!ocupado(e))throw e;await new Promise(r=>setTimeout(r,4000*(i+1)))}}};
     let res;
-    try{res=await intento(route,route==='only_in_cloud'?45000:120000)}
-    catch(e){ // Gemini Nano puede tardar en una computadora lenta: en modo híbrido se pasa a la nube
-      if(!(route==='prefer_on_device'&&(e.tarde||AI.deviceStatus!=='available')))throw e;
-      res=await intento('only_in_cloud',45000)}
+    if(route==='only_in_cloud')res=await nube();
+    else{
+      try{res=await intento(route,120000)}
+      catch(e){ // Gemini Nano puede tardar en una computadora lenta: en modo híbrido se pasa a la nube
+        if(route!=='prefer_on_device')throw e;
+        console.warn('Ethan: en el aparato no se pudo, se usa la nube:',e);
+        res=await nube()}}
     data=parseJSON(res.response.text());src=res.response.inferenceSource==='on_device'?'device':'cloud';
   }
   S.stats[src==='device'?'dev':'cloud']++;save();
