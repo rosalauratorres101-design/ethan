@@ -1,5 +1,5 @@
 // Ethan · funciona sin internet. Solo guarda archivos de la propia app; nunca habla con otros sitios.
-const VERSION = "ethan-v15";
+const VERSION = "ethan-v16";
 const ARCHIVOS = ["./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png", "./icons/icon-maskable-512.png"];
 

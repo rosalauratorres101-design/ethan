@@ -805,7 +805,7 @@ function selectores(conTema,etiqueta){
    <label>${I('Diferenciación','Differentiation')}<select id="apoyo"><option value="simplificado" ${S.apoyo==='simplificado'?'selected':''}>🌱 ${I('Simplificado','Simplified')}</option><option value="estandar" ${S.apoyo==='estandar'?'selected':''}>⭐ ${I('Estándar','Standard')}</option><option value="avanzado" ${S.apoyo==='avanzado'?'selected':''}>🚀 ${I('Avanzado','Advanced')}</option></select></label>
    <label>${I('País (para nombres y lugares)','Country (for names and places)')}<select id="pais">${D.paises.map(p=>`<option value="${p.k}" ${p.k===S.pais?'selected':''}>${p.f} ${pick(p.n)}</option>`).join('')}</select></label>
   </div>
-  <p class="est">📚 ${l&&l.est?`EE. UU.: ${esc(l.est[0])} · Texas: ${esc(l.est[1])} · Chile: ${esc(l.est[2])}`:''}</p>
+  <p class="est">📚 ${l&&l.est?`${I('EE. UU.','US')}: ${esc(l.est[0])} · Texas: ${esc(l.est[1])} · Chile: ${esc(l.est[2])}`:''}</p>
   ${conTema?`<label class="full">${etiqueta}<input id="tema" maxlength="160" placeholder="${I('Opcional. Ej.: los animales del desierto','Optional. E.g., desert animals')}"></label>`:''}`;
 }
 function enlazarSelectores(){

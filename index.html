@@ -1968,7 +1968,7 @@ function crearHoja(){
     if(!l.frases){const f=fuenteSinFin(l),vistos=new Set();
       for(let i=0;i<HOJA.n*6&&qs.length<HOJA.n;i++){
         notas[l.id]=HOJA.apoyo==="simplificado"?0:HOJA.apoyo==="avanzado"?(i%2?4:5):[0,2,3][i%3];
-        const q=f();const key=JSON.stringify([q.q,q.v,q.o,q.piezas]);if(vistos.has(key))continue;vistos.add(key);qs.push(q)}}
+        const q=f();const cor=Array.isArray(q.o)&&Number.isInteger(q.a)?q.o[q.a]:(q.a!==undefined?q.a:q.resp);const key=JSON.stringify([q.q,q.v,q.piezas,cor]);if(vistos.has(key))continue;vistos.add(key);qs.push(q)}}
   }finally{apoyo=guardaApoyo;lang=guardaLang;if(guardaNota===undefined)delete notas[l.id];else notas[l.id]=guardaNota}
   const nv=nivelDe(l.nivel),nom=HOJA.idioma==="en"?["Name","Date","Learn","Practice","Answer key","Teacher guide","Objective","Materials","Activity","Start","Main activity","Closing","Support"]:["Nombre","Fecha","Aprende","Practica","Clave de respuestas","Guía del maestro","Objetivo","Materiales","Actividad","Inicio","Desarrollo","Cierre","Apoyo"];
   const apoyoTxt=ix(APOYO[HOJA.apoyo]);
