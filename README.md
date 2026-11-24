@@ -106,6 +106,8 @@ Ethan is a free bilingual (Spanish/English) PreK–8 learning app for children. 
 - Every result shows where it ran (`inferenceSource`): on the device or in the cloud.
 - **App Check** with reCAPTCHA Enterprise protects the API.
 - Before any text is sent, a privacy filter removes names, emails and phone numbers.
+- In hybrid mode, if Gemini Nano takes longer than 2 minutes, the page switches to the cloud. If the cloud is busy, it waits and retries up to 3 times.
+- After every answer, an automatic check fixes Spanish ¡ and ¿ marks and sentence capitals, removes vocabulary words that are not in the reading, and drops broken questions. It tells the teacher what it changed. The teacher still reviews everything before class.
 - If there is no internet and no on-device model, the page still shows Ethan's own lesson material (no AI).
 
 ### Run it
@@ -115,6 +117,6 @@ Ethan is a free bilingual (Spanish/English) PreK–8 learning app for children. 
 
 ### Why it matters
 
-Teachers in bilingual and dual-language classrooms spend hours adapting material to different reading levels and two languages. Ethan for Teachers does it in seconds, keeps student data private, and keeps AI away from children.
+Teachers in bilingual and dual-language classrooms spend hours adapting material to different reading levels and two languages. Ethan for Teachers does it in under a minute, keeps student data private, and keeps AI away from children.
 
 License: MIT (see `LICENSE`).

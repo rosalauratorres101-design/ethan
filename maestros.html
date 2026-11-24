@@ -747,7 +747,7 @@ const SCH={
 };
 const PROMPTS={
  lectura:(c,tema)=>`You are an experienced bilingual elementary and middle school teacher. ${seg()}
-Write a short original reading passage in ${c.idioma} for ${c.grado}${tema?` about this topic chosen by the teacher: "${tema}" (it may have a typo; use the intended word). The whole passage must be about that topic`:''}. The passage must also practice the lesson "${c.l.titulo&&c.l.titulo[1]}" with several clear examples of it. Use places or names typical of ${c.pais} when natural.
+Write a short original reading passage in ${c.idioma} for ${c.grado}${tema?` about this topic chosen by the teacher: "${tema}" (it may have a typo; use the intended word). The whole passage must be about that topic`:''}. The passage must also practice the lesson "${c.l.titulo&&c.l.titulo[1]}" with several clear examples of it. Use first names typical of ${c.pais}. Do not name specific real places, parks, cities or facts unless you are completely sure they are correct; general places (a park, a forest, the beach) are better. Check that adjectives agree in gender and number with their nouns (las focas juguetonas).
 Length: ${S.nivel==='pk'?'40-60':S.nivel==='g12'?'70-110':S.nivel==='g35'?'130-180':'180-240'} words. Then write 4 multiple-choice comprehension questions (3 options each, one correct; mix literal and inference), 4 vocabulary words taken exactly from the passage (each word must appear in the passage) with child-friendly meanings, and a one-sentence note for the teacher naming the skill practiced${c.est?` (standards: ${c.est})`:''}.
 Write everything in ${c.idioma}. Return JSON: {"titulo":"","texto":"","vocabulario":[{"palabra":"","significado":""}],"preguntas":[{"pregunta":"","opciones":["","",""],"respuesta":0}],"nota":""}. "respuesta" is the index (0-2) of the correct option.`,
  explicar:(c,tema)=>`You are an experienced bilingual teacher. ${seg()}
@@ -866,6 +866,10 @@ function revisar(tab,d){const notas=[];if(!d||typeof d!=='object')return notas;
   if(S.idioma==='es'){const n={signos:0,may:0};recorrer(d,t=>arreglarES(t,n));
     if(n.signos)notas.push(I(`Agregué ${n.signos} signo(s) de apertura ¡ o ¿.`,`Added ${n.signos} opening ¡ or ¿ mark(s).`));
     if(n.may)notas.push(I(`Puse ${n.may} mayúscula(s) al inicio de oración.`,`Capitalized ${n.may} sentence start(s).`))}
+  if(Array.isArray(d.preguntas)){ // preguntas incompletas o con respuesta fuera de rango no se muestran
+    const antes=d.preguntas.length;
+    d.preguntas=d.preguntas.filter(q=>q&&q.pregunta&&Array.isArray(q.opciones)&&q.opciones.length>=2&&Number.isInteger(q.respuesta)&&q.respuesta>=0&&q.respuesta<q.opciones.length&&new Set(q.opciones.map(sinAcento)).size===q.opciones.length);
+    if(d.preguntas.length<antes)notas.push(I(`Quité ${antes-d.preguntas.length} pregunta(s) con opciones o respuesta mal hechas.`,`Removed ${antes-d.preguntas.length} question(s) with broken options or answer.`))}
   if(tab==='lectura'&&Array.isArray(d.vocabulario)){const txt=sinAcento(d.texto||'');const quitar=[];
     d.vocabulario=d.vocabulario.filter(v=>{const w=sinAcento(v.palabra||'').trim().replace(/^(el|la|los|las|un|una|the|a|an) /,'');
       const raiz=w.replace(/(es|s)$/,'');const ok=w&&(txt.includes(w)||(raiz.length>3&&txt.includes(raiz)));if(!ok)quitar.push(v.palabra);return ok});
